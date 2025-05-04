@@ -13,7 +13,7 @@ Stremio uygulamasını açın
 Sağ üst köşedeki eklenti butonuna tıklayın
 "Eklenti URL'si ekle" seçeneğini seçin
 Aşağıdaki URL'yi yapıştırın:
-https://[eklenti-sunucu-adresiniz]/manifest.json
+https://[eklenti-sunucu-adresi]/manifest.json
 Letterboxd hesabınızı bağlamak için:
 Eklenti ayarlarına gidin
 "Letterboxd'a Bağlan" butonuna tıklayın
@@ -26,7 +26,7 @@ npm veya yarn
 Kurulum
 bash
 # Repo'yu klonlayın
-git clone https://github.com/kullanıcıadınız/stremio-letterboxd-sync.git
+git clone https://github.com/mryilmz/stremio-letterboxd-sync.git
 cd stremio-letterboxd-sync
 
 # Bağımlılıkları yükleyin
