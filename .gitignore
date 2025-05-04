@@ -1,0 +1,41 @@
+# Bağımlılıklar
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+
+# Ortam değişkenleri
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Derleme çıktıları
+dist/
+build/
+out/
+
+# Loglar
+logs/
+*.log
+
+# Cache dosyaları
+.npm
+.cache/
+.eslintcache
+
+# Editor klasörleri
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# Özel yapılandırma
+config.json
+credentials.json

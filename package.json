@@ -1,0 +1,39 @@
+{
+    "name": "stremio-letterboxd-sync",
+    "version": "0.1.0",
+    "description": "Stremio'dan izlediğiniz filmleri Letterboxd'a otomatik olarak aktaran bir eklenti",
+    "main": "src/index.js",
+    "scripts": {
+      "start": "node src/index.js",
+      "dev": "nodemon src/index.js",
+      "test": "jest",
+      "lint": "eslint ."
+    },
+    "keywords": [
+      "stremio",
+      "addon",
+      "letterboxd",
+      "sync",
+      "movies",
+      "tracking"
+    ],
+    "author": "Sizin Adınız",
+    "license": "MIT",
+    "dependencies": {
+      "axios": "^1.6.2",
+      "cheerio": "^1.0.0-rc.12",
+      "cors": "^2.8.5",
+      "dotenv": "^16.3.1",
+      "express": "^4.18.2",
+      "node-cache": "^5.1.2",
+      "stremio-addon-sdk": "^1.6.10"
+    },
+    "devDependencies": {
+      "eslint": "^8.55.0",
+      "jest": "^29.7.0",
+      "nodemon": "^3.0.2"
+    },
+    "engines": {
+      "node": ">=14.0.0"
+    }
+  }
