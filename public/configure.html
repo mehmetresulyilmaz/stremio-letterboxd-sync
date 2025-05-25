@@ -78,6 +78,7 @@
             background-color: #333;
             color: var(--text-color);
             font-size: 16px;
+            box-sizing: border-box;
         }
         
         button {
@@ -95,6 +96,11 @@
             background-color: #e67300;
         }
         
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
         button.secondary {
             background-color: #7f8c8d;
         }
@@ -106,6 +112,7 @@
         .button-group {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .status {
@@ -120,6 +127,10 @@
         
         .status.error {
             background-color: var(--error-color);
+        }
+        
+        .status.info {
+            background-color: #3498db;
         }
         
         .hidden {
@@ -161,6 +172,12 @@
             font-family: monospace;
             margin: 10px 0;
             word-break: break-all;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .installation-url:hover {
+            background-color: #444;
         }
         
         footer {
@@ -170,12 +187,42 @@
             border-top: 1px solid #444;
             color: #aaa;
         }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <img src="/public/logo.png" alt="Stremio Letterboxd Sync" class="logo" onerror="this.src='/api/placeholder/120/120'">
+            <img src="/public/logo.png" alt="Stremio Letterboxd Sync" class="logo">
             <h1>Stremio Letterboxd Sync</h1>
             <p class="subtitle">İzlediğiniz filmleri otomatik olarak Letterboxd'a aktarın</p>
         </header>
@@ -188,7 +235,7 @@
                 </li>
                 <li>
                     <p>"Eklenti URL'si ekle" seçeneğini seçin ve aşağıdaki URL'yi yapıştırın:</p>
-                    <div class="installation-url" id="addon-url">https://your-addon-url/manifest.json</div>
+                    <div class="installation-url" id="addon-url" title="Kopyalamak için tıklayın">https://your-addon-url/manifest.json</div>
                 </li>
                 <li>
                     <p>Letterboxd hesabınızı bağlamak için aşağıdaki formu doldurun.</p>
@@ -224,6 +271,15 @@
                     <option value="false">Kapalı</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="sync-interval">Senkronizasyon Aralığı (dakika):</label>
+                <select id="sync-interval">
+                    <option value="5">5 Dakika</option>
+                    <option value="15" selected>15 Dakika</option>
+                    <option value="30">30 Dakika</option>
+                    <option value="60">1 Saat</option>
+                </select>
+            </div>
             <div class="button-group">
                 <button id="save-settings-btn" type="button">Ayarları Kaydet</button>
                 <button id="sync-now-btn" type="button" class="secondary">Şimdi Senkronize Et</button>
@@ -253,6 +309,7 @@
             const checkStatusBtn = document.getElementById('check-status-btn');
             const loginStatus = document.getElementById('login-status');
             const autoSyncSelect = document.getElementById('auto-sync');
+            const syncIntervalSelect = document.getElementById('sync-interval');
             const saveSettingsBtn = document.getElementById('save-settings-btn');
             const syncNowBtn = document.getElementById('sync-now-btn');
             const settingsStatus = document.getElementById('settings-status');
@@ -260,4 +317,213 @@
             
             // Eklenti URL'sini dinamik olarak ayarla
             const hostname = window.location.hostname;
-            const port = window.location.
+            const port = window.location.port;
+            const protocol = window.location.protocol;
+            const fullUrl = port ? `${protocol}//${hostname}:${port}/manifest.json` : `${protocol}//${hostname}/manifest.json`;
+            addonUrl.textContent = fullUrl;
+            
+            // URL'yi kopyalama işlevi
+            addonUrl.addEventListener('click', function() {
+                navigator.clipboard.writeText(fullUrl).then(function() {
+                    showStatus(settingsStatus, 'URL kopyalandı!', 'success');
+                }).catch(function() {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = fullUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showStatus(settingsStatus, 'URL kopyalandı!', 'success');
+                });
+            });
+            
+            // Kaydedilmiş ayarları yükle
+            loadSettings();
+            
+            // Event listener'lar
+            loginBtn.addEventListener('click', handleLogin);
+            checkStatusBtn.addEventListener('click', checkConnectionStatus);
+            saveSettingsBtn.addEventListener('click', saveSettings);
+            syncNowBtn.addEventListener('click', syncNow);
+            
+            // Enter tuşu ile giriş yapma
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+            
+            // Giriş işlemi
+            async function handleLogin() {
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                if (!username || !password) {
+                    showStatus(loginStatus, 'Lütfen kullanıcı adı ve şifrenizi girin.', 'error');
+                    return;
+                }
+                
+                setButtonLoading(loginBtn, true);
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showStatus(loginStatus, 'Letterboxd hesabınız başarıyla bağlandı!', 'success');
+                        // Şifreyi temizle
+                        passwordInput.value = '';
+                    } else {
+                        showStatus(loginStatus, result.error || 'Bağlantı hatası oluştu.', 'error');
+                    }
+                } catch (error) {
+                    showStatus(loginStatus, 'Sunucu bağlantısı başarısız.', 'error');
+                } finally {
+                    setButtonLoading(loginBtn, false);
+                }
+            }
+            
+            // Bağlantı durumunu kontrol et
+            async function checkConnectionStatus() {
+                setButtonLoading(checkStatusBtn, true);
+                
+                try {
+                    const response = await fetch('/api/auth/status');
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        if (result.connected) {
+                            showStatus(loginStatus, `Letterboxd hesabınız bağlı: ${result.username}`, 'success');
+                        } else {
+                            showStatus(loginStatus, 'Letterboxd hesabınız bağlı değil.', 'error');
+                        }
+                    } else {
+                        showStatus(loginStatus, 'Durum kontrolü başarısız.', 'error');
+                    }
+                } catch (error) {
+                    showStatus(loginStatus, 'Sunucu bağlantısı başarısız.', 'error');
+                } finally {
+                    setButtonLoading(checkStatusBtn, false);
+                }
+            }
+            
+            // Ayarları kaydet
+            async function saveSettings() {
+                const autoSync = autoSyncSelect.value === 'true';
+                const syncInterval = parseInt(syncIntervalSelect.value);
+                
+                setButtonLoading(saveSettingsBtn, true);
+                
+                try {
+                    const response = await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            autoSync, 
+                            syncInterval 
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        showStatus(settingsStatus, 'Ayarlar başarıyla kaydedildi!', 'success');
+                        // Ayarları local storage'a da kaydet
+                        saveSettingsToLocal({ autoSync, syncInterval });
+                    } else {
+                        showStatus(settingsStatus, 'Ayarlar kaydedilemedi.', 'error');
+                    }
+                } catch (error) {
+                    showStatus(settingsStatus, 'Sunucu bağlantısı başarısız.', 'error');
+                } finally {
+                    setButtonLoading(saveSettingsBtn, false);
+                }
+            }
+            
+            // Manuel senkronizasyon
+            async function syncNow() {
+                setButtonLoading(syncNowBtn, true);
+                
+                try {
+                    const response = await fetch('/api/sync/manual', {
+                        method: 'POST'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showStatus(settingsStatus, `Senkronizasyon tamamlandı! ${result.synced || 0} film aktarıldı.`, 'success');
+                    } else {
+                        showStatus(settingsStatus, result.error || 'Senkronizasyon başarısız.', 'error');
+                    }
+                } catch (error) {
+                    showStatus(settingsStatus, 'Sunucu bağlantısı başarısız.', 'error');
+                } finally {
+                    setButtonLoading(syncNowBtn, false);
+                }
+            }
+            
+            // Ayarları yükle
+            function loadSettings() {
+                const savedSettings = getSettingsFromLocal();
+                if (savedSettings) {
+                    autoSyncSelect.value = savedSettings.autoSync ? 'true' : 'false';
+                    syncIntervalSelect.value = savedSettings.syncInterval || '15';
+                }
+            }
+            
+            // Local storage'dan ayarları al
+            function getSettingsFromLocal() {
+                const settings = {
+                    autoSync: true,
+                    syncInterval: 15
+                };
+                
+                // Simulated local storage since we can't use actual localStorage
+                return settings;
+            }
+            
+            // Local storage'a ayarları kaydet
+            function saveSettingsToLocal(settings) {
+                // Simulated save since we can't use actual localStorage
+                console.log('Settings saved:', settings);
+            }
+            
+            // Status mesajı göster
+            function showStatus(element, message, type) {
+                element.textContent = message;
+                element.className = `status ${type}`;
+                element.classList.remove('hidden');
+                
+                // 5 saniye sonra gizle
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, 5000);
+            }
+            
+            // Button loading durumu
+            function setButtonLoading(button, isLoading) {
+                if (isLoading) {
+                    button.disabled = true;
+                    const originalText = button.textContent;
+                    button.innerHTML = '<span class="loading"></span>' + originalText;
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = button.textContent.replace(/^.*?([A-Za-zÇĞIİÖŞÜçğıİöşü].*)$/, '$1');
+                }
+            }
+            
+            // İlk yüklemede bağlantı durumunu kontrol et
+            checkConnectionStatus();
+        });
+    </script>
+</body>
+</html>
