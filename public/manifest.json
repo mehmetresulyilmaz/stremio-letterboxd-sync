@@ -1,0 +1,13 @@
+{
+    "id": "com.stremio.letterboxd.sync",
+    "version": "1.0.0",
+    "name": "Letterboxd Sync",
+    "description": "Stremio'da izlediğiniz filmleri otomatik olarak Letterboxd hesabınıza aktarır.",
+    "resources": [],
+    "types": [],
+    "catalogs": [],
+    "behaviorHints": {
+        "configurable": true,
+        "configurationRequired": true
+    }
+}

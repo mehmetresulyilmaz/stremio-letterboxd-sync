@@ -1,0 +1,77 @@
+body {
+    background: #f7f7f7;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    color: #222;
+}
+.container {
+    max-width: 420px;
+    margin: 2em auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 2em;
+}
+header {
+    text-align: center;
+    margin-bottom: 2em;
+}
+.logo {
+    width: 64px;
+    margin-bottom: 1em;
+}
+.card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 1.2em 1em;
+    margin-bottom: 1.5em;
+    box-shadow: 0 1px 4px #0001;
+}
+.card h2 {
+    margin-top: 0;
+}
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 0.7em;
+    margin-bottom: 1em;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    font-size: 1em;
+}
+button {
+    background: #0077cc;
+    color: #fff;
+    border: none;
+    padding: 0.7em 1.5em;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-bottom: 0.5em;
+}
+button:hover {
+    background: #005fa3;
+}
+.status {
+    margin-top: 0.7em;
+    font-size: 0.97em;
+    color: #0077cc;
+    min-height: 1.2em;
+}
+.addon-url {
+    background: #e3f2fd;
+    color: #0077cc;
+    padding: 0.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0.5em 0;
+    font-family: monospace;
+    word-break: break-all;
+    text-align: center;
+}
+footer {
+    text-align: center;
+    margin-top: 2em;
+    color: #888;
+    font-size: 0.95em;
+}
+a { color: #0077cc; }

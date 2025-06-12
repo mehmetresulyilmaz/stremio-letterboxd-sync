@@ -8,13 +8,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0077cc;
-            --primary-dark: #005fa3;
-            --bg: #f6f8fa;
-            --card-bg: #fff;
-            --border: #e5e7eb;
+            --primary: #ff9800;
+            --primary-dark: #f57c00;
+            --bg: #10141a;
+            --card-bg: #181c23;
+            --border: #23272f;
             --radius: 14px;
-            --shadow: 0 2px 16px #0001;
+            --shadow: 0 2px 16px #0008;
+            --text: #f3f6fa;
+            --text-muted: #b0b8c1;
         }
         html, body {
             height: 100%;
@@ -22,7 +24,7 @@
             padding: 0;
             background: var(--bg);
             font-family: 'Inter', Arial, sans-serif;
-            color: #222;
+            color: var(--text);
         }
         .container {
             max-width: 420px;
@@ -40,23 +42,24 @@
             width: 60px;
             margin-bottom: 1em;
             border-radius: 12px;
-            box-shadow: 0 2px 8px #0002;
+            box-shadow: 0 2px 8px #0006;
         }
         h1 {
             font-size: 1.7em;
             font-weight: 600;
             margin: 0 0 0.3em 0;
             letter-spacing: -1px;
+            color: var(--text);
         }
         header p {
-            color: #555;
+            color: var(--text-muted);
             margin: 0 0 0.5em 0;
             font-size: 1.05em;
         }
         .card {
             background: var(--card-bg);
             border-radius: var(--radius);
-            box-shadow: 0 1px 6px #0001;
+            box-shadow: 0 1px 6px #0004;
             padding: 1.3em 1em 1em 1em;
             margin-bottom: 1.5em;
             border: 1px solid var(--border);
@@ -72,7 +75,7 @@
             margin: 0.7em 0 0.5em 0;
         }
         .addon-url {
-            background: #e3f2fd;
+            background: #232c3a;
             color: var(--primary);
             padding: 0.5em;
             border-radius: 7px;
@@ -82,11 +85,11 @@
             word-break: break-all;
             text-align: center;
             font-size: 1em;
-            border: 1px solid #b3d7f6;
+            border: 1px solid #3a2a1a;
             transition: background 0.2s;
         }
         .addon-url:hover {
-            background: #d0e7fa;
+            background: #221a12;
         }
         form {
             display: flex;
@@ -99,12 +102,14 @@
             border: 1px solid var(--border);
             border-radius: 7px;
             font-size: 1em;
-            background: #f8fafc;
-            transition: border 0.2s;
+            background: #23272f;
+            color: var(--text);
+            transition: border 0.2s, background 0.2s;
         }
         input[type="text"]:focus, input[type="password"]:focus {
             border-color: var(--primary);
             outline: none;
+            background: #232c3a;
         }
         button {
             background: var(--primary);
@@ -130,7 +135,7 @@
         footer {
             text-align: center;
             margin-top: 2em;
-            color: #888;
+            color: var(--text-muted);
             font-size: 0.97em;
         }
         a { color: var(--primary); text-decoration: none; }

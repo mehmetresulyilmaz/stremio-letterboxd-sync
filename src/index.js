@@ -1,75 +1,39 @@
 #!/usr/bin/env node
 
-const { serveHTTP, publishToCentral } = require('stremio-addon-sdk');
-const addonInterface = require('./addon');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 7000;
 
-// CORS ayarları
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Statik dosyalar için klasör
-app.use('/public', express.static(path.join(__dirname, '../public')));
-
-// Ana sayfa
-app.get('/', (req, res) => {
-    res.redirect('/configure');
+// API: Letterboxd login (örnek, gerçek entegrasyon için geliştirin)
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
+    // Burada gerçek Letterboxd API veya scraping ile doğrulama yapılmalı
+    if (username && password) {
+        // Demo: Her zaman başarılı
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ error: 'Kullanıcı adı ve şifre gerekli.' });
+    }
 });
 
-// Yapılandırma sayfası
-app.get('/configure', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/configure.html'));
+// API: Senkronizasyon (örnek)
+app.post('/api/sync', (req, res) => {
+    // Burada Stremio geçmişini Letterboxd'a aktarma işlemi yapılmalı
+    res.json({ success: true, synced: 5 }); // Demo: 5 film aktarıldı
 });
 
-// Letterboxd yetkilendirme sayfası
-app.get('/auth/letterboxd', (req, res) => {
-    // Burada Letterboxd'a yönlendirme mantığı olacak
-    res.send('Letterboxd yetkilendirme sayfası');
+// Manifest dosyasını sun
+app.get('/manifest.json', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/manifest.json'));
 });
 
-// Letterboxd callback
-app.get('/auth/letterboxd/callback', (req, res) => {
-    // Letterboxd'dan dönen callback işlenecek
-    res.send('Yetkilendirme tamamlandı');
+app.listen(PORT, () => {
+    console.log(`Stremio Letterboxd Sync çalışıyor: http://localhost:${PORT}/configure.html`);
 });
-
-// API routes
-const apiRouter = express.Router();
-
-// İzleme geçmişi senkronizasyonu
-apiRouter.post('/sync', (req, res) => {
-    // İzlenen içerikleri Letterboxd'a aktarma mantığı
-    res.json({ success: true, message: 'Senkronizasyon başlatıldı' });
-});
-
-// Kullanıcı ayarları
-apiRouter.get('/settings', (req, res) => {
-    // Kullanıcı ayarlarını döndürme mantığı
-    res.json({ autoSync: true });
-});
-
-apiRouter.post('/settings', (req, res) => {
-    // Kullanıcı ayarlarını güncelleme mantığı
-    res.json({ success: true });
-});
-
-// API rotalarını ana uygulamaya ekle
-app.use('/api', apiRouter);
-
-// Stremio eklenti SDK'sını başlat
-serveHTTP(addonInterface, { port: PORT });
-
-console.log(`Eklenti çalışıyor: http://localhost:${PORT}/manifest.json`);
-console.log(`Ayarlar sayfası: http://localhost:${PORT}/configure`);
-
-// İsteğe bağlı: Central'a yayınlama
-// NOT: Sadece eklentiniz hazır olduğunda ve paylaşıma uygun olduğunda yapın
-if (process.env.PUBLISH === 'true') {
-    publishToCentral('https://your-addon-url.com/manifest.json');
-}
