@@ -190,6 +190,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Dinamik eklenti URL'si
         const addonUrl = document.getElementById('addon-url');
+        // Kökte olduğunuz için yolun başında alt klasör yok!
         const url = `${location.protocol}//${location.host}/manifest.json`;
         addonUrl.textContent = url;
         addonUrl.onclick = () => {
